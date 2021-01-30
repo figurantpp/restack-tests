@@ -1,0 +1,3 @@
+[submodule "restack"]
+	path = restack
+	url = https://github.com/figurantpp/restack
