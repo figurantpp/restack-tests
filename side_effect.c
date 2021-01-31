@@ -4,6 +4,8 @@
 
 #include "side_effect.h"
 
+#include <stdlib.h>
+
 unsigned long side_effect_value = SIDE_EFFECT_INITIAL_VALUE;
 
 void increase_side_effect_by(int count)
