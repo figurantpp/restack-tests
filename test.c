@@ -5,12 +5,13 @@
 */
 
 
-#include <malloc.h>
+#include <stdlib.h>
 
-#include <CUnit/CUnit.h>
-#include <CUnit/Basic.h>
 
 #include "restack/restack.h"
+
+
+#include <munit/munit.h>
 
 struct TestObject
 {
@@ -41,7 +42,6 @@ void decrease_test_object_value(void)
 {
     decrease_test_object_value_by(5);
 }
-
 
 void *test_object_init(void)
 {
@@ -75,7 +75,7 @@ void test_object_delete(struct TestObject *object)
 
 #define TEST_SIZE 10
 
-void test_stack(void)
+MunitResult test_stack(const MunitParameter parameters[], void *data)
 {
     struct TestObject *objects[TEST_SIZE];
 
@@ -84,6 +84,10 @@ void test_stack(void)
     size_t i;
 
     restack_init_macro(stack, resources);
+
+    (void)parameters;
+    (void)data;
+
 
     test_object_value = 0;
     test_object_delete_count = 0;
@@ -96,12 +100,14 @@ void test_stack(void)
 
     restack_delete(stack);
 
-    CU_ASSERT_EQUAL(test_object_value, 0)
-    CU_ASSERT_EQUAL(test_object_delete_count, TEST_SIZE)
+    munit_assert_long(test_object_value, == , 0);
+	munit_assert_long(test_object_delete_count, == , TEST_SIZE);
+
+    return MUNIT_OK;
 }
 
 
-void test_isolated_push(void)
+MunitResult test_isolated_push(const MunitParameter parameters[], void *data)
 {
     ResourceStack stack[1];
 
@@ -109,6 +115,10 @@ void test_isolated_push(void)
 
 
     restack_init(stack, resources, 3);
+
+    (void)parameters;
+    (void)data;
+
 
     test_object_value = 0;
 
@@ -122,14 +132,19 @@ void test_isolated_push(void)
 
     restack_delete(stack);
 
-    CU_ASSERT_EQUAL(test_object_value, 0)
+    munit_assert_long(test_object_value, == , 0);
+
+    return MUNIT_OK;
 }
 
-void test_null_push(void)
+MunitResult test_null_push(const MunitParameter parameters[], void *data)
 {
     RestackResource resources[3];
     ResourceStack stack[1];
     restack_init(stack, resources, 3);
+
+    (void)parameters;
+    (void)data;
 
     test_object_value = 0;
 
@@ -139,50 +154,29 @@ void test_null_push(void)
 
     restack_delete(stack);
 
-    CU_ASSERT_EQUAL(test_object_value, 0)
+    munit_assert_long(test_object_value, ==, 0);
+
+    return MUNIT_OK;
 }
 
-int main(void)
+int main(int argc, char * const * argv)
 {
-    int exit = 0;
-    CU_Suite *suite;
+    MunitTest tests[] = {
+        { "Default Stack Test", test_stack, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+        { "Isolated Push Test", test_isolated_push, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+        { "Null Push Test", test_null_push, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+        { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
+    };
 
-    if (CU_initialize_registry() != CUE_SUCCESS)
-    {
-        fprintf(stderr, "Failed to initialize CUnit\n");
-        exit = 1;
-    }
+    MunitSuite const suite = {
+        "restack tests",
+        tests,
+        NULL,
+        1,
+        MUNIT_SUITE_OPTION_NONE
+    };
 
-    if (exit == 0)
-    {
-        suite = CU_add_suite("restack_main_tests", NULL, NULL);
 
-        if (suite == NULL)
-        {
-            fprintf(stderr, "Failed to start suite\n");
-            exit = 2;
-        }
-    }
+    return munit_suite_main(&suite, NULL, argc, argv);
 
-    if (exit == 0)
-    {
-        if (!CU_add_test(suite, "ResourceStack default operations test", test_stack)
-            ||
-            !CU_add_test(suite, "ResourceStack isolated push test", test_isolated_push)
-            ||
-            !CU_add_test(suite, "ResourceStack push with null test", test_null_push) )
-        {
-            fprintf(stderr, "Failed to start tests\n");
-            exit = 3;
-        }
-    }
-
-    if (exit == 0)
-    {
-        CU_basic_run_tests();
-    }
-
-    CU_cleanup_registry();
-
-    return exit;
 }
