@@ -2,8 +2,9 @@
 // Created by figurantpp on 31/01/2021.
 */
 
-#include "restack/restack.h"
 #include <cutest/CuTest.h>
+
+#include "restack/restack.h"
 #include "side_effect.h"
 
 #define TEST_SIZE 10
@@ -95,6 +96,8 @@ void test_overflow(CuTest *test)
 
     restack_set_overflow_handler(test_overflow_handler);
 
+    restack_emit_errors(0);
+
     objects[0] = side_effect_object_init();
     objects[1] = side_effect_object_init();
 
@@ -106,6 +109,7 @@ void test_overflow(CuTest *test)
      * An optional error message may be emitted.
      */
     restack_push(&stack, objects[1], side_effect_object_delete);
+
 
     restack_delete(&stack);
 
@@ -120,7 +124,6 @@ void test_overflow(CuTest *test)
 CuSuite *get_restack_suite()
 {
     CuSuite *spec = CuSuiteNew();
-    CuSuite *suite;
 
     SUITE_ADD_TEST(spec, test_stack);
     SUITE_ADD_TEST(spec, test_isolated_push);
