@@ -22,7 +22,13 @@ set(CMAKE_C_FLAGS "-Wall")
 endif()
 
 
-add_executable(restack_tests test.c)
+add_library(tests
+            tests.c 
+            tests.h 
+            side_effect.c
+            side_effect.h)
+
+add_executable(restack_tests entry.c)
 
 add_subdirectory(restack)
 
@@ -31,5 +37,7 @@ add_library(cutest external/cutest/CuTest.h external/cutest/CuTest.c)
 include_directories(external)
 
 target_link_libraries(restack_tests cutest)
+
+target_link_libraries(restack_tests tests)
 
 target_link_libraries(restack_tests restack)
