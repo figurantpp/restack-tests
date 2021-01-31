@@ -168,13 +168,15 @@ int main(int argc, char * const * argv)
         { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
     };
 
-    MunitSuite const suite = {
+    MunitSuite suite = {
         "restack tests",
-        tests,
+        NULL,
         NULL,
         1,
         MUNIT_SUITE_OPTION_NONE
     };
+
+    suite.tests = tests;
 
 
     return munit_suite_main(&suite, NULL, argc, argv);

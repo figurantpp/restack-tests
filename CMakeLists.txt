@@ -12,7 +12,7 @@ set(CMAKE_C_FLAGS "-Wall -pedantic")
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 
 message(STATUS "Using MSVC flags")
-set(CMAKE_C_FLAGS "-Wall -pedantic")
+set(CMAKE_C_FLAGS "-Wall")
 
 else()
 
