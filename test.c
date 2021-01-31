@@ -10,8 +10,8 @@
 
 #include "restack/restack.h"
 
-
-#include <munit/munit.h>
+#include <cutest/CuTest.h>
+#include <stdio.h>
 
 struct TestObject
 {
@@ -75,7 +75,7 @@ void test_object_delete(struct TestObject *object)
 
 #define TEST_SIZE 10
 
-MunitResult test_stack(const MunitParameter parameters[], void *data)
+void test_stack(CuTest *test)
 {
     struct TestObject *objects[TEST_SIZE];
 
@@ -84,10 +84,6 @@ MunitResult test_stack(const MunitParameter parameters[], void *data)
     size_t i;
 
     restack_init_macro(stack, resources);
-
-    (void)parameters;
-    (void)data;
-
 
     test_object_value = 0;
     test_object_delete_count = 0;
@@ -100,14 +96,12 @@ MunitResult test_stack(const MunitParameter parameters[], void *data)
 
     restack_delete(stack);
 
-    munit_assert_long(test_object_value, == , 0);
-	munit_assert_long(test_object_delete_count, == , TEST_SIZE);
-
-    return MUNIT_OK;
+    CuAssertIntEquals(test, test_object_value, 0);
+    CuAssertIntEquals(test, test_object_delete_count, TEST_SIZE);
 }
 
 
-MunitResult test_isolated_push(const MunitParameter parameters[], void *data)
+void test_isolated_push(CuTest *test)
 {
     ResourceStack stack[1];
 
@@ -115,9 +109,6 @@ MunitResult test_isolated_push(const MunitParameter parameters[], void *data)
 
 
     restack_init(stack, resources, 3);
-
-    (void)parameters;
-    (void)data;
 
 
     test_object_value = 0;
@@ -132,19 +123,14 @@ MunitResult test_isolated_push(const MunitParameter parameters[], void *data)
 
     restack_delete(stack);
 
-    munit_assert_long(test_object_value, == , 0);
-
-    return MUNIT_OK;
+    CuAssertIntEquals(test, test_object_value, 0);
 }
 
-MunitResult test_null_push(const MunitParameter parameters[], void *data)
+void test_null_push(CuTest *test)
 {
     RestackResource resources[3];
     ResourceStack stack[1];
     restack_init(stack, resources, 3);
-
-    (void)parameters;
-    (void)data;
 
     test_object_value = 0;
 
@@ -154,31 +140,29 @@ MunitResult test_null_push(const MunitParameter parameters[], void *data)
 
     restack_delete(stack);
 
-    munit_assert_long(test_object_value, ==, 0);
-
-    return MUNIT_OK;
+    CuAssertIntEquals(test, test_object_value, 0);
 }
 
-int main(int argc, char * const * argv)
+int main(void)
 {
-    MunitTest tests[] = {
-        { "Default Stack Test", test_stack, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-        { "Isolated Push Test", test_isolated_push, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-        { "Null Push Test", test_null_push, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-        { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
-    };
+    CuSuite *spec = CuSuiteNew();
+    CuString *output;
+    CuSuite *suite;
 
-    MunitSuite suite = {
-        "restack tests",
-        NULL,
-        NULL,
-        1,
-        MUNIT_SUITE_OPTION_NONE
-    };
+    SUITE_ADD_TEST(spec, test_stack);
+    SUITE_ADD_TEST(spec, test_isolated_push);
+    SUITE_ADD_TEST(spec, test_null_push);
 
-    suite.tests = tests;
+    output = CuStringNew();
+    suite = CuSuiteNew();
 
+    CuSuiteAddSuite(suite, spec);
 
-    return munit_suite_main(&suite, NULL, argc, argv);
+    CuSuiteRun(suite);
+    CuSuiteSummary(suite, output);
+    CuSuiteDetails(suite, output);
 
+    puts(output->buffer);
+
+    return 0;
 }

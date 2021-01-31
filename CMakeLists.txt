@@ -26,10 +26,10 @@ add_executable(restack_tests test.c)
 
 add_subdirectory(restack)
 
-add_library(munit external/munit/munit.h external/munit/munit.c)
+add_library(cutest external/cutest/CuTest.h external/cutest/CuTest.c)
 
 include_directories(external)
 
-target_link_libraries(restack_tests munit)
+target_link_libraries(restack_tests cutest)
 
 target_link_libraries(restack_tests restack)
